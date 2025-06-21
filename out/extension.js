@@ -46,24 +46,24 @@ function activate(context) {
     const tasksProvider = new tasksProvider_1.TasksProvider(taskManager);
     const notesProvider = new notesProvider_1.NotesProvider(context);
     // Register tree views
-    vscode.window.createTreeView('web3-ai-agent.projectOverview', {
+    vscode.window.createTreeView('jordi.projectOverview', {
         treeDataProvider: projectOverviewProvider,
         showCollapseAll: true
     });
-    vscode.window.createTreeView('web3-ai-agent.tasks', {
+    vscode.window.createTreeView('jordi.tasks', {
         treeDataProvider: tasksProvider,
         showCollapseAll: true
     });
-    vscode.window.createTreeView('web3-ai-agent.notes', {
+    vscode.window.createTreeView('jordi.notes', {
         treeDataProvider: notesProvider,
         showCollapseAll: true
     });
     // Register commands
     const commands = [
-        vscode.commands.registerCommand('web3-ai-agent.openChat', () => {
+        vscode.commands.registerCommand('jordi.openChat', () => {
             chatProvider.show();
         }),
-        vscode.commands.registerCommand('web3-ai-agent.analyzeProject', async () => {
+        vscode.commands.registerCommand('jordi.analyzeProject', async () => {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: "Analyzing project structure...",
@@ -79,7 +79,7 @@ function activate(context) {
                 }
             });
         }),
-        vscode.commands.registerCommand('web3-ai-agent.generateComponent', async () => {
+        vscode.commands.registerCommand('jordi.generateComponent', async () => {
             const componentName = await vscode.window.showInputBox({
                 prompt: 'Enter component name',
                 placeHolder: 'MyComponent'
@@ -100,7 +100,7 @@ function activate(context) {
                 });
             }
         }),
-        vscode.commands.registerCommand('web3-ai-agent.generateSmartContract', async () => {
+        vscode.commands.registerCommand('jordi.generateSmartContract', async () => {
             const blockchain = await vscode.window.showQuickPick(['Solana', 'Sui'], {
                 placeHolder: 'Select blockchain platform'
             });
@@ -131,7 +131,7 @@ function activate(context) {
                 }
             }
         }),
-        vscode.commands.registerCommand('web3-ai-agent.optimizeCode', async () => {
+        vscode.commands.registerCommand('jordi.optimizeCode', async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 vscode.window.showWarningMessage('No active editor found');
@@ -164,10 +164,10 @@ function activate(context) {
                 }
             });
         }),
-        vscode.commands.registerCommand('web3-ai-agent.runTests', async () => {
+        vscode.commands.registerCommand('jordi.runTests', async () => {
             await taskManager.runTestsWithAnalysis();
         }),
-        vscode.commands.registerCommand('web3-ai-agent.deployContract', async () => {
+        vscode.commands.registerCommand('jordi.deployContract', async () => {
             const blockchain = await vscode.window.showQuickPick(['Solana', 'Sui'], {
                 placeHolder: 'Select blockchain platform'
             });
@@ -175,11 +175,11 @@ function activate(context) {
                 await taskManager.deployContract(blockchain.toLowerCase());
             }
         }),
-        vscode.commands.registerCommand('web3-ai-agent.auditSecurity', async () => {
+        vscode.commands.registerCommand('jordi.auditSecurity', async () => {
             await taskManager.performSecurityAudit();
         }),
         // Node.js specific commands
-        vscode.commands.registerCommand('web3-ai-agent.optimizeNodeJS', async () => {
+        vscode.commands.registerCommand('jordi.optimizeNodeJS', async () => {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: "Optimizing Node.js application...",
@@ -194,7 +194,7 @@ function activate(context) {
                 }
             });
         }),
-        vscode.commands.registerCommand('web3-ai-agent.generateAPI', async () => {
+        vscode.commands.registerCommand('jordi.generateAPI', async () => {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: "Generating API endpoints...",
@@ -210,7 +210,7 @@ function activate(context) {
             });
         }),
         // UI/UX specific commands
-        vscode.commands.registerCommand('web3-ai-agent.designComponents', async () => {
+        vscode.commands.registerCommand('jordi.designComponents', async () => {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: "Designing UI/UX components...",
@@ -225,7 +225,7 @@ function activate(context) {
                 }
             });
         }),
-        vscode.commands.registerCommand('web3-ai-agent.auditAccessibility', async () => {
+        vscode.commands.registerCommand('jordi.auditAccessibility', async () => {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: "Auditing accessibility...",
@@ -241,7 +241,7 @@ function activate(context) {
             });
         }),
         // Task management commands
-        vscode.commands.registerCommand('web3-ai-agent.showTaskDetails', async (taskId) => {
+        vscode.commands.registerCommand('jordi.showTaskDetails', async (taskId) => {
             const task = taskManager.getTask(taskId);
             if (task) {
                 // Show task details in a new document
@@ -265,26 +265,26 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
                 await vscode.window.showTextDocument(doc);
             }
         }),
-        vscode.commands.registerCommand('web3-ai-agent.pauseTask', async (taskId) => {
+        vscode.commands.registerCommand('jordi.pauseTask', async (taskId) => {
             vscode.window.showInformationMessage(`Task ${taskId} paused`);
         }),
-        vscode.commands.registerCommand('web3-ai-agent.resumeTask', async (taskId) => {
+        vscode.commands.registerCommand('jordi.resumeTask', async (taskId) => {
             vscode.window.showInformationMessage(`Task ${taskId} resumed`);
         }),
-        vscode.commands.registerCommand('web3-ai-agent.cancelTask', async (taskId) => {
+        vscode.commands.registerCommand('jordi.cancelTask', async (taskId) => {
             vscode.window.showInformationMessage(`Task ${taskId} canceled`);
         }),
         // Terminal monitoring commands
-        vscode.commands.registerCommand('web3-ai-agent.startTerminalMonitoring', async () => {
+        vscode.commands.registerCommand('jordi.startTerminalMonitoring', async () => {
             terminalMonitor.startMonitoring();
         }),
-        vscode.commands.registerCommand('web3-ai-agent.stopTerminalMonitoring', async () => {
+        vscode.commands.registerCommand('jordi.stopTerminalMonitoring', async () => {
             terminalMonitor.stopMonitoring();
         }),
-        vscode.commands.registerCommand('web3-ai-agent.toggleAutoFix', async () => {
+        vscode.commands.registerCommand('jordi.toggleAutoFix', async () => {
             terminalMonitor.toggleAutoFix();
         }),
-        vscode.commands.registerCommand('web3-ai-agent.analyzeTerminalError', async () => {
+        vscode.commands.registerCommand('jordi.analyzeTerminalError', async () => {
             const activeTerminal = vscode.window.activeTerminal;
             if (!activeTerminal) {
                 vscode.window.showWarningMessage('No active terminal found');
@@ -319,7 +319,7 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
             }
         }),
         // Local LLM management commands
-        vscode.commands.registerCommand('web3-ai-agent.testLocalLLM', async () => {
+        vscode.commands.registerCommand('jordi.testLocalLLM', async () => {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: "Testing local LLM connection...",
@@ -339,7 +339,7 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
                 }
             });
         }),
-        vscode.commands.registerCommand('web3-ai-agent.listLocalModels', async () => {
+        vscode.commands.registerCommand('jordi.listLocalModels', async () => {
             try {
                 const models = await aiAgent.getAvailableLocalModels();
                 if (models.length > 0) {
@@ -347,7 +347,7 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
                         placeHolder: 'Select a local model to use'
                     });
                     if (selectedModel) {
-                        const config = vscode.workspace.getConfiguration('web3-ai-agent.localLLM');
+                        const config = vscode.workspace.getConfiguration('jordi.localLLM');
                         await config.update('model', selectedModel, vscode.ConfigurationTarget.Global);
                         vscode.window.showInformationMessage(`Local model set to: ${selectedModel}`);
                     }
@@ -360,8 +360,8 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
                 vscode.window.showErrorMessage(`Failed to list local models: ${error}`);
             }
         }),
-        vscode.commands.registerCommand('web3-ai-agent.configureLocalLLM', async () => {
-            const currentConfig = vscode.workspace.getConfiguration('web3-ai-agent.localLLM');
+        vscode.commands.registerCommand('jordi.configureLocalLLM', async () => {
+            const currentConfig = vscode.workspace.getConfiguration('jordi.localLLM');
             const endpoint = await vscode.window.showInputBox({
                 prompt: 'Enter local LLM endpoint URL',
                 value: currentConfig.get('endpoint', 'http://localhost:11434'),
@@ -393,7 +393,7 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
             await currentConfig.update('model', model, vscode.ConfigurationTarget.Global);
             vscode.window.showInformationMessage('Local LLM configuration updated!', 'Test Connection').then(selection => {
                 if (selection === 'Test Connection') {
-                    vscode.commands.executeCommand('web3-ai-agent.testLocalLLM');
+                    vscode.commands.executeCommand('jordi.testLocalLLM');
                 }
             });
         })
@@ -404,7 +404,7 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
     const config = vscode.workspace.getConfiguration('web3-ai-agent');
     if (config.get('autoAnalyze', true)) {
         setTimeout(() => {
-            vscode.commands.executeCommand('web3-ai-agent.analyzeProject');
+            vscode.commands.executeCommand('jordi.analyzeProject');
         }, 2000);
     }
     // Auto-start terminal monitoring if enabled
@@ -418,7 +418,7 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
     // Show welcome message
     vscode.window.showInformationMessage('Web3 AI Agent is ready! Click the robot icon in the activity bar to get started.', 'Open Chat').then(selection => {
         if (selection === 'Open Chat') {
-            vscode.commands.executeCommand('web3-ai-agent.openChat');
+            vscode.commands.executeCommand('jordi.openChat');
         }
     });
 }

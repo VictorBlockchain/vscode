@@ -52,7 +52,7 @@ class ChatWebviewProvider {
         this.addMessage({
             id: this.generateId(),
             role: 'assistant',
-            content: `Hello! I'm your Web3 AI Agent. I can help you with:
+            content: `Hello! I'm Jordi 🤖, your AI development assistant. I can help you with:
 
 🚀 **Next.js Development**
 - Generate components and pages

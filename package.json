@@ -1,7 +1,7 @@
 {
-  "name": "web3-ai-agent",
-  "displayName": "Web3 AI Agent",
-  "description": "Self-sufficient AI agent for Next.js and Web3 development on Sui and Solana blockchains",
+  "name": "jordi-ai-agent",
+  "displayName": "Jordi - AI Development Assistant",
+  "description": "🤖 Jordi: Your smart AI coding companion for Next.js and Web3 development",
   "version": "1.0.0",
   "publisher": "web3-dev-tools",
   "engines": {
@@ -22,6 +22,7 @@
     "smart-contracts",
     "dapp"
   ],
+  "icon": "media/jordi-icon.svg",
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -29,117 +30,117 @@
   "contributes": {
     "commands": [
       {
-        "command": "web3-ai-agent.openChat",
+        "command": "jordi.openChat",
         "title": "Open AI Agent Chat",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.analyzeProject",
+        "command": "jordi.analyzeProject",
         "title": "Analyze Project Structure",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.generateComponent",
+        "command": "jordi.generateComponent",
         "title": "Generate Next.js Component",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.generateSmartContract",
+        "command": "jordi.generateSmartContract",
         "title": "Generate Smart Contract",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.optimizeCode",
+        "command": "jordi.optimizeCode",
         "title": "Optimize Code",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.runTests",
+        "command": "jordi.runTests",
         "title": "Run Tests with AI Analysis",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.deployContract",
+        "command": "jordi.deployContract",
         "title": "Deploy Smart Contract",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.auditSecurity",
+        "command": "jordi.auditSecurity",
         "title": "Security Audit",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.optimizeNodeJS",
+        "command": "jordi.optimizeNodeJS",
         "title": "Optimize Node.js App",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.generateAPI",
+        "command": "jordi.generateAPI",
         "title": "Generate API Endpoints",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.designComponents",
+        "command": "jordi.designComponents",
         "title": "Design UI/UX Components",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.auditAccessibility",
+        "command": "jordi.auditAccessibility",
         "title": "Audit Accessibility",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.showTaskDetails",
+        "command": "jordi.showTaskDetails",
         "title": "Show Task Details",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.startTerminalMonitoring",
+        "command": "jordi.startTerminalMonitoring",
         "title": "Start Terminal Monitoring",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.stopTerminalMonitoring",
+        "command": "jordi.stopTerminalMonitoring",
         "title": "Stop Terminal Monitoring",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.toggleAutoFix",
+        "command": "jordi.toggleAutoFix",
         "title": "Toggle Auto-Fix",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.analyzeTerminalError",
+        "command": "jordi.analyzeTerminalError",
         "title": "Analyze Terminal Error",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.testLocalLLM",
+        "command": "jordi.testLocalLLM",
         "title": "Test Local LLM Connection",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.listLocalModels",
+        "command": "jordi.listLocalModels",
         "title": "List Local LLM Models",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       },
       {
-        "command": "web3-ai-agent.configureLocalLLM",
+        "command": "jordi.configureLocalLLM",
         "title": "Configure Local LLM",
-        "category": "Web3 AI Agent"
+        "category": "Jordi"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "web3-ai-agent.analyzeProject",
+          "command": "jordi.analyzeProject",
           "when": "explorerResourceIsFolder",
           "group": "web3-ai-agent"
         }
       ],
       "editor/context": [
         {
-          "command": "web3-ai-agent.optimizeCode",
+          "command": "jordi.optimizeCode",
           "when": "editorHasSelection",
           "group": "web3-ai-agent"
         }
@@ -148,37 +149,37 @@
     "configuration": {
       "title": "Web3 AI Agent",
       "properties": {
-        "web3-ai-agent.deepseekApiKey": {
+        "jordi.deepseekApiKey": {
           "type": "string",
           "default": "",
           "description": "DeepSeek API Key",
           "scope": "application"
         },
-        "web3-ai-agent.openaiApiKey": {
+        "jordi.openaiApiKey": {
           "type": "string",
           "default": "",
           "description": "OpenAI API Key",
           "scope": "application"
         },
-        "web3-ai-agent.claudeApiKey": {
+        "jordi.claudeApiKey": {
           "type": "string",
           "default": "",
           "description": "Claude API Key",
           "scope": "application"
         },
-        "web3-ai-agent.customApiEndpoint": {
+        "jordi.customApiEndpoint": {
           "type": "string",
           "default": "",
           "description": "Custom API Endpoint URL",
           "scope": "application"
         },
-        "web3-ai-agent.customApiKey": {
+        "jordi.customApiKey": {
           "type": "string",
           "default": "",
           "description": "Custom API Key",
           "scope": "application"
         },
-        "web3-ai-agent.preferredModel": {
+        "jordi.preferredModel": {
           "type": "string",
           "enum": [
             "deepseek",
@@ -192,12 +193,12 @@
           "default": "deepseek",
           "description": "Preferred AI model for code generation"
         },
-        "web3-ai-agent.autoAnalyze": {
+        "jordi.autoAnalyze": {
           "type": "boolean",
           "default": true,
           "description": "Automatically analyze project on startup"
         },
-        "web3-ai-agent.suiNetwork": {
+        "jordi.suiNetwork": {
           "type": "string",
           "enum": [
             "mainnet",
@@ -208,7 +209,7 @@
           "default": "testnet",
           "description": "Default Sui network"
         },
-        "web3-ai-agent.solanaNetwork": {
+        "jordi.solanaNetwork": {
           "type": "string",
           "enum": [
             "mainnet-beta",
@@ -219,39 +220,39 @@
           "default": "devnet",
           "description": "Default Solana network"
         },
-        "web3-ai-agent.terminalMonitoring.autoStart": {
+        "jordi.terminalMonitoring.autoStart": {
           "type": "boolean",
           "default": true,
           "description": "Automatically start terminal monitoring on extension activation"
         },
-        "web3-ai-agent.terminalMonitoring.autoFix": {
+        "jordi.terminalMonitoring.autoFix": {
           "type": "boolean",
           "default": true,
           "description": "Automatically apply high-confidence fixes"
         },
-        "web3-ai-agent.terminalMonitoring.confidence": {
+        "jordi.terminalMonitoring.confidence": {
           "type": "number",
           "default": 0.7,
           "minimum": 0.1,
           "maximum": 1.0,
           "description": "Minimum confidence threshold for automatic fixes"
         },
-        "web3-ai-agent.terminalMonitoring.notifications": {
+        "jordi.terminalMonitoring.notifications": {
           "type": "boolean",
           "default": true,
           "description": "Show notifications for detected errors and applied fixes"
         },
-        "web3-ai-agent.localLLM.endpoint": {
+        "jordi.localLLM.endpoint": {
           "type": "string",
           "default": "http://localhost:11434",
           "description": "Local LLM endpoint URL"
         },
-        "web3-ai-agent.localLLM.model": {
+        "jordi.localLLM.model": {
           "type": "string",
           "default": "codellama:7b",
           "description": "Local LLM model name"
         },
-        "web3-ai-agent.localLLM.apiFormat": {
+        "jordi.localLLM.apiFormat": {
           "type": "string",
           "enum": [
             "ollama",
@@ -263,26 +264,26 @@
           "default": "ollama",
           "description": "Local LLM API format"
         },
-        "web3-ai-agent.localLLM.apiKey": {
+        "jordi.localLLM.apiKey": {
           "type": "string",
           "default": "",
           "description": "API key for local LLM (if required)"
         },
-        "web3-ai-agent.localLLM.temperature": {
+        "jordi.localLLM.temperature": {
           "type": "number",
           "default": 0.7,
           "minimum": 0.0,
           "maximum": 2.0,
           "description": "Temperature for local LLM responses"
         },
-        "web3-ai-agent.localLLM.maxTokens": {
+        "jordi.localLLM.maxTokens": {
           "type": "number",
           "default": 2048,
           "minimum": 100,
           "maximum": 8192,
           "description": "Maximum tokens for local LLM responses"
         },
-        "web3-ai-agent.localLLM.timeout": {
+        "jordi.localLLM.timeout": {
           "type": "number",
           "default": 30000,
           "minimum": 5000,
@@ -294,26 +295,26 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "web3-ai-agent",
-          "title": "Web3 AI Agent",
-          "icon": "$(robot)"
+          "id": "jordi-ai-agent",
+          "title": "Jordi - AI Assistant",
+          "icon": "media/jordi-icon.svg"
         }
       ]
     },
     "views": {
-      "web3-ai-agent": [
+      "jordi-ai-agent": [
         {
-          "id": "web3-ai-agent.projectOverview",
+          "id": "jordi.projectOverview",
           "name": "Project Overview",
           "when": "workspaceFolderCount > 0"
         },
         {
-          "id": "web3-ai-agent.tasks",
+          "id": "jordi.tasks",
           "name": "AI Tasks",
           "when": "workspaceFolderCount > 0"
         },
         {
-          "id": "web3-ai-agent.notes",
+          "id": "jordi.notes",
           "name": "AI Notes",
           "when": "workspaceFolderCount > 0"
         }

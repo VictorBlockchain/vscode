@@ -1,6 +1,6 @@
-# Web3 AI Agent - VSCode Extension
+# 🤖 Jordi - AI Development Assistant
 
-A comprehensive AI-powered development assistant for Next.js and Web3 applications, specializing in Solana and Sui blockchain development.
+Meet Jordi, your smart AI coding companion for Next.js and Web3 development! Jordi specializes in Solana and Sui blockchain development and makes coding feel like having a conversation with a brilliant colleague.
 
 ## 🚀 Features
 
