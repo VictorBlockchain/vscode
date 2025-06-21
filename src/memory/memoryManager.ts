@@ -40,21 +40,48 @@ export class MemoryManager {
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-        const projectPath = workspaceFolder?.uri.fsPath || '';
         
-        // Store memory in workspace .vscode folder
-        const vscodeDir = path.join(projectPath, '.vscode');
-        if (!fs.existsSync(vscodeDir)) {
-            fs.mkdirSync(vscodeDir, { recursive: true });
+        if (workspaceFolder && workspaceFolder.uri.fsPath) {
+            // Store memory in workspace .vscode folder if workspace exists
+            const projectPath = workspaceFolder.uri.fsPath;
+            const vscodeDir = path.join(projectPath, '.vscode');
+            
+            try {
+                if (!fs.existsSync(vscodeDir)) {
+                    fs.mkdirSync(vscodeDir, { recursive: true });
+                }
+                this.memoryFile = path.join(vscodeDir, 'jordi-memory.json');
+            } catch (error) {
+                console.warn('Could not create workspace .vscode directory, falling back to extension storage:', error);
+                // Fallback to extension global storage
+                this.memoryFile = path.join(context.globalStorageUri.fsPath, 'jordi-memory.json');
+                this.ensureStorageDirectory();
+            }
+        } else {
+            // No workspace folder, use extension global storage
+            this.memoryFile = path.join(context.globalStorageUri.fsPath, 'jordi-memory.json');
+            this.ensureStorageDirectory();
         }
         
-        this.memoryFile = path.join(vscodeDir, 'jordi-memory.json');
         this.loadMemory();
+    }
+
+    private ensureStorageDirectory(): void {
+        try {
+            const storageDir = path.dirname(this.memoryFile);
+            if (!fs.existsSync(storageDir)) {
+                fs.mkdirSync(storageDir, { recursive: true });
+            }
+        } catch (error) {
+            console.error('Could not create storage directory:', error);
+            // If we can't create storage, we'll work in memory only
+            this.memoryFile = '';
+        }
     }
 
     private loadMemory(): void {
         try {
-            if (fs.existsSync(this.memoryFile)) {
+            if (this.memoryFile && fs.existsSync(this.memoryFile)) {
                 const data = fs.readFileSync(this.memoryFile, 'utf8');
                 this.memory = JSON.parse(data);
                 // Convert date strings back to Date objects
@@ -112,7 +139,11 @@ export class MemoryManager {
     private saveMemory(): void {
         try {
             this.memory.lastUpdated = new Date();
-            fs.writeFileSync(this.memoryFile, JSON.stringify(this.memory, null, 2));
+            if (this.memoryFile) {
+                fs.writeFileSync(this.memoryFile, JSON.stringify(this.memory, null, 2));
+            } else {
+                console.warn('Memory file not available, running in memory-only mode');
+            }
         } catch (error) {
             console.error('Error saving memory:', error);
         }
