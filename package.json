@@ -249,6 +249,64 @@
           "default": "devnet",
           "description": "Default Solana network"
         },
+        "web3-ai-agent.preferredModel": {
+          "type": "string",
+          "enum": [
+            "deepseek",
+            "gpt-4",
+            "gpt-3.5-turbo",
+            "claude-3-opus",
+            "claude-3-sonnet",
+            "local-llm",
+            "custom"
+          ],
+          "default": "local-llm",
+          "description": "Preferred AI model for code generation (Local Ollama recommended)"
+        },
+        "web3-ai-agent.localLLM.endpoint": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Local Ollama endpoint URL"
+        },
+        "web3-ai-agent.localLLM.model": {
+          "type": "string",
+          "default": "deepseek-coder",
+          "description": "Local Ollama model name (e.g., deepseek-coder, codellama, llama2)"
+        },
+        "web3-ai-agent.localLLM.apiFormat": {
+          "type": "string",
+          "enum": [
+            "ollama",
+            "openai-compatible"
+          ],
+          "default": "ollama",
+          "description": "API format for local LLM"
+        },
+        "web3-ai-agent.apiKeys.deepseek": {
+          "type": "string",
+          "default": "",
+          "description": "DeepSeek API Key (optional)"
+        },
+        "web3-ai-agent.apiKeys.openai": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key (optional)"
+        },
+        "web3-ai-agent.apiKeys.anthropic": {
+          "type": "string",
+          "default": "",
+          "description": "Anthropic Claude API Key (optional)"
+        },
+        "web3-ai-agent.terminalMonitoring.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable terminal monitoring for errors"
+        },
+        "web3-ai-agent.terminalMonitoring.autoFix": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically suggest fixes for terminal errors"
+        },
         "jordi.terminalMonitoring.autoStart": {
           "type": "boolean",
           "default": true,

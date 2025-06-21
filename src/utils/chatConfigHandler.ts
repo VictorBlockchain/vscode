@@ -153,6 +153,24 @@ export class ChatConfigHandler {
             }
         }
 
+        // Settings patterns
+        const settingsPatterns = [
+            /(?:open|show|view)\s+settings/,
+            /settings/,
+            /(?:open|show)\s+(?:configuration|config)/,
+            /(?:configure|setup)\s+(?:jordi|extension)/
+        ];
+
+        for (const pattern of settingsPatterns) {
+            const match = message.match(pattern);
+            if (match) {
+                return {
+                    type: 'setting',
+                    action: 'open'
+                };
+            }
+        }
+
         // Memory patterns
         const memoryPatterns = [
             /(?:show|view|display)\s+(?:my\s+)?memory/,
@@ -362,8 +380,32 @@ To change the endpoint, say: "set local llm endpoint to http://localhost:8080"`;
     }
 
     private async handleGeneralSetting(command: ConfigCommand): Promise<string> {
-        // Handle other general settings
-        return `✅ Setting updated: ${command.action} = ${command.value}`;
+        switch (command.action) {
+            case 'open':
+                // Open VS Code settings focused on Jordi/web3-ai-agent settings
+                vscode.commands.executeCommand('workbench.action.openSettings', '@ext:jordi-ai-agent');
+                return `⚙️ **Settings Opened!**
+
+I've opened the VS Code settings page focused on Jordi AI Agent configuration.
+
+**Quick Setup Guide:**
+
+🤖 **Recommended: Local Ollama (Free & Private)**
+1. Install Ollama: https://ollama.ai
+2. Run: \`ollama pull deepseek-coder\`
+3. Set "Preferred Model" to "local-llm"
+4. Verify endpoint: http://localhost:11434
+
+🔑 **Optional: API Keys**
+- DeepSeek API Key (affordable)
+- OpenAI API Key (GPT-4)
+- Anthropic API Key (Claude)
+
+💡 **Tip**: Local Ollama is recommended for privacy and cost-effectiveness!`;
+
+            default:
+                return `✅ Setting updated: ${command.action} = ${command.value}`;
+        }
     }
 
     private getConfigHelp(): string {
@@ -384,12 +426,18 @@ To change the endpoint, say: "set local llm endpoint to http://localhost:8080"`;
 • "switch ollama to deepseek-coder:6.7b" - Change to different model
 • "set local llm endpoint to http://localhost:8080" - Change endpoint
 
+**Settings:**
+• "settings" - Open VS Code settings for Jordi
+• "open settings" - Quick access to configuration
+• "configure jordi" - Setup wizard
+
 **Networks:**
 • "set solana to mainnet" - Configure Solana network
 • "use testnet for sui" - Configure Sui network
 • "switch to devnet" - Set both networks to devnet
 
 **Examples:**
+• "settings" ✅ (Opens configuration panel)
 • "switch ollama to qwen3" ✅
 • "set chatgpt api to 4808045" ✅  
 • "use deepseek" ✅

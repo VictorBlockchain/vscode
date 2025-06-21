@@ -379,7 +379,155 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
         }),
 
         vscode.commands.registerCommand('jordi.configureLocalLLM', async () => {
-            const currentConfig = vscode.workspace.getConfiguration('jordi.localLLM');
+            // First, ask user what they want to configure
+            const setupChoice = await vscode.window.showQuickPick([
+                {
+                    label: '🤖 Local Ollama (Recommended)',
+                    description: 'Free, private, runs on your machine',
+                    detail: 'Best for privacy and cost-effectiveness'
+                },
+                {
+                    label: '🔑 API Keys',
+                    description: 'DeepSeek, OpenAI, Claude',
+                    detail: 'Cloud-based AI services'
+                },
+                {
+                    label: '⚙️ Advanced Local Setup',
+                    description: 'Custom endpoints and formats',
+                    detail: 'For advanced users with custom setups'
+                }
+            ], {
+                placeHolder: 'How would you like to configure Jordi AI?'
+            });
+
+            if (!setupChoice) return;
+
+            if (setupChoice.label.includes('API Keys')) {
+                // Open settings for API keys
+                vscode.commands.executeCommand('workbench.action.openSettings', 'web3-ai-agent.apiKeys');
+                vscode.window.showInformationMessage(
+                    '🔑 API Keys Settings Opened!\n\nAdd your API keys in the settings panel. Recommended: DeepSeek (most affordable)',
+                    'Get DeepSeek Key'
+                ).then(selection => {
+                    if (selection === 'Get DeepSeek Key') {
+                        vscode.env.openExternal(vscode.Uri.parse('https://platform.deepseek.com/api_keys'));
+                    }
+                });
+                return;
+            }
+
+            if (setupChoice.label.includes('Local Ollama')) {
+                // Check if Ollama is running and get available models
+                try {
+                    const http = require('http');
+                    
+                    const checkOllama = (): Promise<any> => {
+                        return new Promise((resolve, reject) => {
+                            const req = http.get('http://localhost:11434/api/tags', (res: any) => {
+                                let data = '';
+                                res.on('data', (chunk: any) => data += chunk);
+                                res.on('end', () => {
+                                    try {
+                                        resolve(JSON.parse(data));
+                                    } catch (e) {
+                                        reject(e);
+                                    }
+                                });
+                            });
+                            req.on('error', reject);
+                            req.setTimeout(3000, () => {
+                                req.destroy();
+                                reject(new Error('Timeout'));
+                            });
+                        });
+                    };
+
+                    const data: any = await checkOllama();
+                    const models = data.models || [];
+                    
+                    if (models.length > 0) {
+                        // Show available models
+                        const modelChoices = models.map((model: any) => ({
+                            label: model.name,
+                            description: `Size: ${(model.size / 1024 / 1024 / 1024).toFixed(1)}GB`,
+                            detail: model.modified_at ? `Modified: ${new Date(model.modified_at).toLocaleDateString()}` : ''
+                        }));
+
+                        const selectedModel = await vscode.window.showQuickPick(modelChoices, {
+                            placeHolder: 'Select an Ollama model'
+                        });
+
+                        if (selectedModel) {
+                            // Update configuration to use selected model
+                            const config = vscode.workspace.getConfiguration('web3-ai-agent.localLLM');
+                            await config.update('endpoint', 'http://localhost:11434', vscode.ConfigurationTarget.Global);
+                            await config.update('model', (selectedModel as any).label, vscode.ConfigurationTarget.Global);
+                            await config.update('apiFormat', 'ollama', vscode.ConfigurationTarget.Global);
+                            
+                            // Set preferred model to local-llm
+                            const mainConfig = vscode.workspace.getConfiguration('web3-ai-agent');
+                            await mainConfig.update('preferredModel', 'local-llm', vscode.ConfigurationTarget.Global);
+
+                            vscode.window.showInformationMessage(
+                                `✅ Ollama configured with ${(selectedModel as any).label}!`,
+                                'Test Connection'
+                            ).then(selection => {
+                                if (selection === 'Test Connection') {
+                                    vscode.commands.executeCommand('jordi.testLocalLLM');
+                                }
+                            });
+                        }
+                    } else {
+                        // No models found, guide user to install
+                        vscode.window.showInformationMessage(
+                            '📥 No Ollama models found. Install a recommended model?',
+                            'Install deepseek-coder',
+                            'Install codellama',
+                            'Manual Setup'
+                        ).then(selection => {
+                            if (selection === 'Install deepseek-coder') {
+                                vscode.window.showInformationMessage(
+                                    '🚀 Run this command in your terminal:\n\nollama pull deepseek-coder\n\nThen try configuring again!',
+                                    'Copy Command'
+                                ).then(copySelection => {
+                                    if (copySelection === 'Copy Command') {
+                                        vscode.env.clipboard.writeText('ollama pull deepseek-coder');
+                                    }
+                                });
+                            } else if (selection === 'Install codellama') {
+                                vscode.window.showInformationMessage(
+                                    '🚀 Run this command in your terminal:\n\nollama pull codellama\n\nThen try configuring again!',
+                                    'Copy Command'
+                                ).then(copySelection => {
+                                    if (copySelection === 'Copy Command') {
+                                        vscode.env.clipboard.writeText('ollama pull codellama');
+                                    }
+                                });
+                            } else if (selection === 'Manual Setup') {
+                                vscode.env.openExternal(vscode.Uri.parse('https://ollama.ai/library'));
+                            }
+                        });
+                    }
+                } catch (error) {
+                    // Ollama not running, guide user to install
+                    vscode.window.showInformationMessage(
+                        '🤖 Ollama not detected. Would you like to install it?',
+                        'Install Ollama',
+                        'Manual Setup'
+                    ).then(selection => {
+                        if (selection === 'Install Ollama') {
+                            vscode.env.openExternal(vscode.Uri.parse('https://ollama.ai'));
+                        } else if (selection === 'Manual Setup') {
+                            // Fallback to manual configuration
+                            vscode.commands.executeCommand('workbench.action.openSettings', 'web3-ai-agent.localLLM');
+                        }
+                    });
+                }
+                return;
+            }
+
+            // Advanced setup - original flow
+            const currentConfig = vscode.workspace.getConfiguration('web3-ai-agent.localLLM');
             
             const endpoint = await vscode.window.showInputBox({
                 prompt: 'Enter local LLM endpoint URL',
@@ -391,7 +539,7 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
 
             const apiFormat = await vscode.window.showQuickPick([
                 'ollama',
-                'openai',
+                'openai-compatible',
                 'textgen',
                 'vllm',
                 'custom'
@@ -403,8 +551,8 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
 
             const model = await vscode.window.showInputBox({
                 prompt: 'Enter model name',
-                value: currentConfig.get('model', 'codellama:7b'),
-                placeHolder: 'codellama:7b'
+                value: currentConfig.get('model', 'deepseek-coder'),
+                placeHolder: 'deepseek-coder'
             });
 
             if (!model) return;
