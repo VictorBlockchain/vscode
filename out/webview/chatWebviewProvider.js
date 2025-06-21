@@ -715,6 +715,54 @@ What would you like to work on today?`,
 </body>
 </html>`;
     }
+    sendWelcomeMessage() {
+        if (!this.panel) {
+            return;
+        }
+        const welcomeMessage = {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: `🤖 **Welcome to Jordi AI Agent!** 
+
+I'm your intelligent coding companion, ready to help with:
+
+🌐 **Web3 Development**
+- Solana & Sui smart contracts
+- Blockchain integration
+- Security auditing
+
+⚡ **Next.js & Node.js**
+- Project optimization
+- API development
+- Performance tuning
+
+🎨 **UI/UX Design**
+- Component generation
+- Accessibility auditing
+- Design systems
+
+🔧 **Development Tools**
+- Code optimization
+- Error fixing
+- Task automation
+
+**Try asking me:**
+- "Analyze my project"
+- "Generate a React component"
+- "Create a Solana contract"
+- "Optimize this code"
+- "Show my memory"
+- "Configure local LLM"
+
+What would you like to work on today?`,
+            timestamp: new Date()
+        };
+        this.messages.push(welcomeMessage);
+        this.panel.webview.postMessage({
+            type: 'addMessage',
+            message: welcomeMessage
+        });
+    }
 }
 exports.ChatWebviewProvider = ChatWebviewProvider;
 //# sourceMappingURL=chatWebviewProvider.js.map

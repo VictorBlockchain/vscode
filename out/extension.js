@@ -34,13 +34,22 @@ const notesProvider_1 = require("./providers/notesProvider");
 const projectOverviewProvider_1 = require("./providers/projectOverviewProvider");
 const tasksProvider_1 = require("./providers/tasksProvider");
 function activate(context) {
-    console.log('Web3 AI Agent extension is now active!');
+    console.log('🤖 Jordi AI Agent extension is now active!');
     // Initialize core components
     const aiAgent = new aiAgentProvider_1.AIAgentProvider(context);
     const projectAnalyzer = new projectAnalyzer_1.ProjectAnalyzer(aiAgent);
     const taskManager = new taskManager_1.TaskManager(aiAgent);
     const terminalMonitor = new terminalMonitor_1.TerminalMonitor(aiAgent);
     const chatProvider = new chatWebviewProvider_1.ChatWebviewProvider(context, aiAgent);
+    // Show welcome experience
+    showWelcomeExperience(context, chatProvider);
+    // Create status bar item to show Jordi is active
+    const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    statusBarItem.text = "$(robot) Jordi AI";
+    statusBarItem.tooltip = "Jordi AI Agent is active - Click to open chat";
+    statusBarItem.command = 'jordi.openChat';
+    statusBarItem.show();
+    context.subscriptions.push(statusBarItem);
     // Initialize tree view providers
     const projectOverviewProvider = new projectOverviewProvider_1.ProjectOverviewProvider(projectAnalyzer);
     const tasksProvider = new tasksProvider_1.TasksProvider(taskManager);
@@ -397,6 +406,18 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
                 }
             });
         }),
+        // Welcome experience commands
+        vscode.commands.registerCommand('jordi.resetWelcome', async () => {
+            await context.globalState.update('jordi.hasShownWelcome', false);
+            vscode.window.showInformationMessage('Welcome experience reset! Reload the window to see it again.', 'Reload Window').then(selection => {
+                if (selection === 'Reload Window') {
+                    vscode.commands.executeCommand('workbench.action.reloadWindow');
+                }
+            });
+        }),
+        vscode.commands.registerCommand('jordi.showFeatures', () => {
+            showFeaturesOverview();
+        }),
         // Memory Management Commands
         vscode.commands.registerCommand('jordi.showMemory', async () => {
             try {
@@ -570,16 +591,207 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
     }
     // Add terminal monitor to disposables
     context.subscriptions.push(terminalMonitor);
-    // Show welcome message
-    vscode.window.showInformationMessage('Web3 AI Agent is ready! Click the robot icon in the activity bar to get started.', 'Open Chat').then(selection => {
-        if (selection === 'Open Chat') {
-            vscode.commands.executeCommand('jordi.openChat');
+}
+exports.activate = activate;
+async function showWelcomeExperience(context, chatProvider) {
+    // Check if this is the first time the extension is activated
+    const isFirstTime = !context.globalState.get('jordi.hasShownWelcome', false);
+    const hasWorkspace = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0;
+    if (isFirstTime) {
+        // Mark that we've shown the welcome
+        await context.globalState.update('jordi.hasShownWelcome', true);
+        // Show comprehensive welcome
+        if (!hasWorkspace) {
+            // No workspace - guide user to open a folder
+            const action = await vscode.window.showInformationMessage('🤖 Welcome to Jordi AI Agent! To get started, please open a folder or workspace.', 'Open Folder', 'Open Workspace', 'Continue Without Folder');
+            switch (action) {
+                case 'Open Folder':
+                    await vscode.commands.executeCommand('vscode.openFolder');
+                    break;
+                case 'Open Workspace':
+                    await vscode.commands.executeCommand('workbench.action.openWorkspace');
+                    break;
+                case 'Continue Without Folder':
+                    showGettingStartedMessage(chatProvider);
+                    break;
+            }
+        }
+        else {
+            // Has workspace - show getting started
+            showGettingStartedMessage(chatProvider);
+        }
+    }
+    else {
+        // Returning user - simple activation message
+        const action = await vscode.window.showInformationMessage('🤖 Jordi AI Agent is ready! Your smart coding companion for Next.js and Web3 development.', 'Open Chat', 'Show Memory');
+        switch (action) {
+            case 'Open Chat':
+                chatProvider.show();
+                break;
+            case 'Show Memory':
+                vscode.commands.executeCommand('jordi.showMemory');
+                break;
+        }
+    }
+}
+function showGettingStartedMessage(chatProvider) {
+    const action = vscode.window.showInformationMessage('🎉 Jordi is ready to help! I can assist with Next.js development, Web3 projects (Solana & Sui), code optimization, and much more.', 'Start Chatting', 'View Features', 'Configure AI').then(selection => {
+        switch (selection) {
+            case 'Start Chatting':
+                chatProvider.show();
+                // Send a welcome message to the chat
+                setTimeout(() => {
+                    chatProvider.sendWelcomeMessage();
+                }, 500);
+                break;
+            case 'View Features':
+                showFeaturesOverview();
+                break;
+            case 'Configure AI':
+                vscode.commands.executeCommand('jordi.configureLocalLLM');
+                break;
         }
     });
 }
-exports.activate = activate;
+function showFeaturesOverview() {
+    const panel = vscode.window.createWebviewPanel('jordiFeaturesOverview', '🤖 Jordi AI Agent - Features', vscode.ViewColumn.One, {
+        enableScripts: true,
+        retainContextWhenHidden: true
+    });
+    panel.webview.html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Jordi Features</title>
+            <style>
+                body { 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    padding: 20px;
+                    line-height: 1.6;
+                    color: var(--vscode-foreground);
+                    background: var(--vscode-editor-background);
+                }
+                .feature-section {
+                    margin-bottom: 30px;
+                    padding: 20px;
+                    border: 1px solid var(--vscode-panel-border);
+                    border-radius: 8px;
+                    background: var(--vscode-editor-background);
+                }
+                .feature-title {
+                    font-size: 20px;
+                    font-weight: bold;
+                    margin-bottom: 15px;
+                    color: var(--vscode-textLink-foreground);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .feature-list {
+                    list-style: none;
+                    padding: 0;
+                }
+                .feature-list li {
+                    margin-bottom: 8px;
+                    padding: 8px 12px;
+                    background: var(--vscode-input-background);
+                    border-radius: 4px;
+                    border-left: 3px solid var(--vscode-textLink-foreground);
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    padding: 20px;
+                    background: var(--vscode-input-background);
+                    border-radius: 8px;
+                }
+                .header h1 {
+                    margin: 0;
+                    color: var(--vscode-textLink-foreground);
+                    font-size: 28px;
+                }
+                .header p {
+                    margin: 10px 0 0 0;
+                    font-size: 16px;
+                    opacity: 0.8;
+                }
+                .quick-start {
+                    background: var(--vscode-button-background);
+                    color: var(--vscode-button-foreground);
+                    padding: 15px;
+                    border-radius: 8px;
+                    text-align: center;
+                    margin-top: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🤖 Jordi AI Agent</h1>
+                <p>Your intelligent coding companion for Next.js and Web3 development</p>
+            </div>
+
+            <div class="feature-section">
+                <div class="feature-title">💬 Smart Chat Interface</div>
+                <ul class="feature-list">
+                    <li>Natural language commands with 48+ patterns</li>
+                    <li>Context-aware conversations about your project</li>
+                    <li>Memory system that remembers your preferences</li>
+                    <li>Multi-AI support (ChatGPT, Claude, DeepSeek, Local LLMs)</li>
+                </ul>
+            </div>
+
+            <div class="feature-section">
+                <div class="feature-title">🌐 Web3 Development</div>
+                <ul class="feature-list">
+                    <li>Solana smart contract generation and deployment</li>
+                    <li>Sui blockchain development tools</li>
+                    <li>Security auditing for smart contracts</li>
+                    <li>Web3 integration patterns and best practices</li>
+                </ul>
+            </div>
+
+            <div class="feature-section">
+                <div class="feature-title">⚡ Next.js & Node.js</div>
+                <ul class="feature-list">
+                    <li>Project analysis and optimization</li>
+                    <li>API endpoint generation</li>
+                    <li>Performance optimization suggestions</li>
+                    <li>Code refactoring and improvements</li>
+                </ul>
+            </div>
+
+            <div class="feature-section">
+                <div class="feature-title">🎨 UI/UX Design</div>
+                <ul class="feature-list">
+                    <li>Component design and generation</li>
+                    <li>Accessibility auditing</li>
+                    <li>Design system recommendations</li>
+                    <li>Responsive design patterns</li>
+                </ul>
+            </div>
+
+            <div class="feature-section">
+                <div class="feature-title">🔧 Development Tools</div>
+                <ul class="feature-list">
+                    <li>Terminal error monitoring and auto-fix</li>
+                    <li>Task management and progress tracking</li>
+                    <li>Code optimization and refactoring</li>
+                    <li>Test generation and execution</li>
+                </ul>
+            </div>
+
+            <div class="quick-start">
+                <strong>🚀 Quick Start:</strong> Click the 🤖 robot icon in the Activity Bar to open Jordi's chat interface!
+            </div>
+        </body>
+        </html>
+    `;
+}
 function deactivate() {
-    console.log('Web3 AI Agent extension deactivated');
+    console.log('🤖 Jordi AI Agent extension deactivated');
 }
 exports.deactivate = deactivate;
 //# sourceMappingURL=extension.js.map

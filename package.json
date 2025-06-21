@@ -147,6 +147,16 @@
         "command": "jordi.clearMemory",
         "title": "Clear Memory",
         "category": "Jordi"
+      },
+      {
+        "command": "jordi.resetWelcome",
+        "title": "Reset Welcome Experience",
+        "category": "Jordi"
+      },
+      {
+        "command": "jordi.showFeatures",
+        "title": "Show Features Overview",
+        "category": "Jordi"
       }
     ],
     "menus": {
