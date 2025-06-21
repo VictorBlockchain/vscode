@@ -38,10 +38,59 @@ Meet Jordi, your smart AI coding companion for Next.js and Web3 development! Jor
 
 ## 📦 Installation
 
-1. Clone this repository
-2. Install dependencies: `npm install`
-3. Compile TypeScript: `npm run compile`
-4. Press `F5` to launch a new VSCode window with the extension loaded
+### 🚀 Quick Install (Recommended)
+
+**Option 1: Download Pre-built Extension**
+1. Download `jordi-ai-agent-1.0.0.vsix` from the [releases page](https://github.com/VictorBlockchain/vscode/releases)
+2. Open VS Code
+3. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
+4. Type "Extensions: Install from VSIX"
+5. Select the downloaded `.vsix` file
+6. Restart VS Code
+7. Look for the 🤖 robot icon in the Activity Bar
+
+**Option 2: Install from Source**
+
+**Windows/Linux:**
+```bash
+git clone https://github.com/VictorBlockchain/vscode.git
+cd vscode
+./install-jordi.sh
+code .
+# Press F5 to launch development mode
+```
+
+**Mac:**
+```bash
+git clone https://github.com/VictorBlockchain/vscode.git
+cd vscode
+./install-jordi-mac.sh
+code .
+# Press Cmd+F5 (NOT F5!) to launch development mode
+```
+
+### 📋 Installation Verification
+
+After installation, you should see:
+- 🤖 **Robot icon** in the VS Code Activity Bar (left sidebar)
+- **Jordi commands** available in Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+- **Welcome message** when clicking the robot icon
+
+### 🆘 Troubleshooting Installation
+
+**No robot icon visible?**
+- Go to `View → Appearance → Activity Bar` (ensure it's enabled)
+- Try `Ctrl+Shift+P` → "View: Show Jordi - AI Assistant"
+
+**Extension not loading?**
+- Restart VS Code completely
+- Check `View → Output → Jordi AI Agent` for error messages
+- See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for detailed help
+
+**Platform-specific help:**
+- **Mac users**: Use `Cmd+F5` instead of `F5` - See [QUICK_START_MAC.md](./QUICK_START_MAC.md)
+- **Windows users**: See [QUICK_START_WINDOWS.md](./QUICK_START_WINDOWS.md) for Windows-specific instructions
+- **All platforms**: See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for detailed help
 
 ## ⚙️ Configuration
 
@@ -112,6 +161,12 @@ See [LOCAL_LLM_GUIDE.md](./LOCAL_LLM_GUIDE.md) for detailed setup instructions.
 
 6. **Optimize Code**: Select code and use "Optimize Code" for AI-powered improvements
 
+7. **Use Memory System** (NEW!):
+   - Say: `"remember that I prefer TypeScript"` to store preferences
+   - Say: `"show my memory"` to view stored information
+   - Say: `"search memory for API keys"` to find specific memories
+   - Jordi automatically remembers your configurations and project context!
+
 ## 🛠️ Available Commands
 
 ### Core Commands
@@ -134,6 +189,12 @@ See [LOCAL_LLM_GUIDE.md](./LOCAL_LLM_GUIDE.md) for detailed setup instructions.
 - `Web3 AI Agent: Stop Terminal Monitoring` - Disable monitoring
 - `Web3 AI Agent: Toggle Auto-Fix` - Enable/disable automatic error fixing
 - `Web3 AI Agent: Analyze Terminal Error` - Manually analyze error messages
+
+### Memory System (NEW!)
+- `Jordi: Show Memory Notepad` - Display all stored memories with beautiful interface
+- `Jordi: Search Memory` - Search for specific memories and information
+- `Jordi: Clear Memory` - Reset all memories (with confirmation)
+- **Chat Commands**: `"show my memory"`, `"remember that..."`, `"search memory for..."`
 
 ## 📊 Sidebar Views
 
