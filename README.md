@@ -28,6 +28,12 @@ Meet Jordi, your smart AI coding companion for Next.js and Web3 development! Jor
 - **Chat Configuration**: Configure everything through natural conversation
 - **Context-Aware Responses**: Project-specific recommendations
 - **Quick Actions**: One-click common tasks
+
+### 🧠 Memory System
+- **Persistent Memory**: Remembers your preferences, project context, and configurations
+- **Automatic Learning**: Learns from your coding patterns and decisions
+- **Smart Context**: Uses memory to provide personalized assistance
+- **Memory Management**: Search, view, and manage stored memories
 - **Export Capabilities**: Save conversations and insights
 
 ## 📦 Installation

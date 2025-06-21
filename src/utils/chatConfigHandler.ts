@@ -2,11 +2,12 @@ import * as vscode from 'vscode';
 import { AIAgentProvider } from '../ai/aiAgentProvider';
 
 export interface ConfigCommand {
-    type: 'api_key' | 'model_switch' | 'local_llm' | 'network' | 'setting' | 'help';
+    type: 'api_key' | 'model_switch' | 'local_llm' | 'network' | 'setting' | 'help' | 'memory';
     action: string;
     value?: string;
     provider?: string;
     model?: string;
+    query?: string;
 }
 
 export class ChatConfigHandler {
@@ -37,6 +38,8 @@ export class ChatConfigHandler {
                     return await this.handleGeneralSetting(command);
                 case 'help':
                     return this.getConfigHelp();
+                case 'memory':
+                    return await this.handleMemoryCommand(command);
                 default:
                     return null;
             }
@@ -147,6 +150,61 @@ export class ChatConfigHandler {
                     type: 'help',
                     action: 'show'
                 };
+            }
+        }
+
+        // Memory patterns
+        const memoryPatterns = [
+            /(?:show|view|display)\s+(?:my\s+)?memory/,
+            /(?:show|view|display)\s+(?:my\s+)?(?:remember\s+)?(?:note|notes|notepad)/,
+            /what\s+do\s+you\s+remember/,
+            /(?:search|find)\s+(?:in\s+)?memory\s+(?:for\s+)?(.+)/,
+            /(?:search|find)\s+(?:in\s+)?(?:notes|notepad)\s+(?:for\s+)?(.+)/,
+            /remember\s+(?:that\s+)?(.+)/,
+            /(?:note|write)\s+(?:down\s+)?(?:that\s+)?(.+)/,
+            /(?:add|save)\s+(?:to\s+)?(?:memory|notes)\s+(.+)/,
+            /(?:clear|reset|delete)\s+(?:my\s+)?memory/,
+            /(?:forget|remove)\s+(.+)/,
+            /memory\s+help/
+        ];
+
+        for (const pattern of memoryPatterns) {
+            const match = message.match(pattern);
+            if (match) {
+                if (message.includes('show') || message.includes('view') || message.includes('display') || message.includes('what do you remember')) {
+                    return {
+                        type: 'memory',
+                        action: 'show'
+                    };
+                } else if (message.includes('search') || message.includes('find')) {
+                    return {
+                        type: 'memory',
+                        action: 'search',
+                        query: match[1]?.trim()
+                    };
+                } else if (message.includes('remember') || message.includes('note') || message.includes('add') || message.includes('save')) {
+                    return {
+                        type: 'memory',
+                        action: 'add',
+                        value: match[1]?.trim()
+                    };
+                } else if (message.includes('clear') || message.includes('reset') || message.includes('delete')) {
+                    return {
+                        type: 'memory',
+                        action: 'clear'
+                    };
+                } else if (message.includes('forget') || message.includes('remove')) {
+                    return {
+                        type: 'memory',
+                        action: 'remove',
+                        query: match[1]?.trim()
+                    };
+                } else if (message.includes('help')) {
+                    return {
+                        type: 'memory',
+                        action: 'help'
+                    };
+                }
             }
         }
 
@@ -342,5 +400,114 @@ Just type naturally - I understand many variations! 🤖`;
 
     public isConfigCommand(message: string): boolean {
         return this.parseConfigCommand(message.toLowerCase()) !== null;
+    }
+
+    private async handleMemoryCommand(command: ConfigCommand): Promise<string> {
+        const memoryManager = this.aiAgent.getMemoryManager();
+
+        switch (command.action) {
+            case 'show':
+                const formattedMemory = await this.aiAgent.getFormattedMemory();
+                return `🧠 **Jordi's Memory Notepad**\n\n${formattedMemory}`;
+
+            case 'search':
+                if (!command.query) {
+                    return '❌ Please specify what to search for. Example: "search memory for API keys"';
+                }
+                const searchResults = await this.aiAgent.searchMemory(command.query);
+                if (searchResults.length === 0) {
+                    return `🔍 No memories found for "${command.query}"`;
+                }
+                
+                let searchResponse = `🔍 **Found ${searchResults.length} memories for "${command.query}":**\n\n`;
+                searchResults.slice(0, 5).forEach((memory, index) => {
+                    const priorityIcon = {
+                        'critical': '🔴',
+                        'high': '🟡',
+                        'medium': '🔵',
+                        'low': '⚪'
+                    }[memory.priority];
+                    
+                    searchResponse += `${priorityIcon} **${memory.title}**\n`;
+                    searchResponse += `*${memory.category} • ${memory.timestamp.toLocaleDateString()}*\n`;
+                    searchResponse += `${memory.content}\n\n`;
+                });
+                
+                if (searchResults.length > 5) {
+                    searchResponse += `... and ${searchResults.length - 5} more results.`;
+                }
+                
+                return searchResponse;
+
+            case 'add':
+                if (!command.value) {
+                    return '❌ Please specify what to remember. Example: "remember that user prefers TypeScript"';
+                }
+                
+                await this.aiAgent.rememberImportantNote(
+                    'User Note',
+                    command.value,
+                    ['user_input', 'manual']
+                );
+                
+                return `✅ **Remembered:** ${command.value}`;
+
+            case 'clear':
+                memoryManager.clearMemory();
+                return '🧠 **Memory cleared!** Starting fresh with a new notepad.';
+
+            case 'remove':
+                if (!command.query) {
+                    return '❌ Please specify what to forget. Example: "forget API key configuration"';
+                }
+                
+                // For now, we'll just add a note that something should be ignored
+                await this.aiAgent.rememberImportantNote(
+                    'Ignore Previous',
+                    `User requested to forget/ignore: ${command.query}`,
+                    ['ignore', 'removal', 'user_request']
+                );
+                
+                return `✅ **Noted to ignore:** ${command.query}`;
+
+            case 'help':
+                return this.getMemoryHelp();
+
+            default:
+                return '❌ Unknown memory command. Try "memory help" for available commands.';
+        }
+    }
+
+    private getMemoryHelp(): string {
+        return `🧠 **Jordi's Memory Commands**
+
+**View Memory:**
+• "show my memory" - Display full memory notepad
+• "view my notes" - Same as above
+• "what do you remember" - Show recent memories
+
+**Search Memory:**
+• "search memory for API keys" - Find specific memories
+• "find notes about React" - Search by topic
+
+**Add to Memory:**
+• "remember that I prefer TypeScript" - Add important note
+• "note that this project uses Next.js" - Save project info
+• "add to memory: user likes dark theme" - Manual memory entry
+
+**Manage Memory:**
+• "clear my memory" - Reset all memories (careful!)
+• "forget API configuration" - Mark something to ignore
+• "memory help" - Show this help
+
+**How Memory Works:**
+🤖 I automatically remember:
+• API configurations you set
+• Tasks we complete together
+• Project context (framework, language, etc.)
+• Important insights and learnings
+• Your preferences and working style
+
+💡 **Tip:** I check my memory before every response to provide better, more personalized assistance!`;
     }
 }

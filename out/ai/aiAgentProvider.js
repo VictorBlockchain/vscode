@@ -30,12 +30,14 @@ exports.AIAgentProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const axios_1 = __importDefault(require("axios"));
 const localLLMProvider_1 = require("./localLLMProvider");
+const memoryManager_1 = require("../memory/memoryManager");
 const openai_1 = __importDefault(require("openai"));
 const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
 class AIAgentProvider {
     constructor(context) {
         this.context = context;
         this.localLLM = new localLLMProvider_1.LocalLLMProvider();
+        this.memoryManager = new memoryManager_1.MemoryManager(context);
         this.initializeClients();
     }
     initializeClients() {
@@ -52,22 +54,25 @@ class AIAgentProvider {
     async generateResponse(prompt, systemPrompt) {
         const config = vscode.workspace.getConfiguration('web3-ai-agent');
         const preferredModel = config.get('preferredModel', 'deepseek');
+        // 🧠 Check memory before generating response
+        const memoryContext = this.memoryManager.getMemoryContext();
+        const enhancedSystemPrompt = this.buildSystemPromptWithMemory(systemPrompt, memoryContext);
         try {
             switch (preferredModel) {
                 case 'deepseek':
-                    return await this.callDeepSeek(prompt, systemPrompt);
+                    return await this.callDeepSeek(prompt, enhancedSystemPrompt);
                 case 'gpt-4':
                 case 'gpt-3.5-turbo':
-                    return await this.callOpenAI(prompt, systemPrompt, preferredModel);
+                    return await this.callOpenAI(prompt, enhancedSystemPrompt, preferredModel);
                 case 'claude-3-opus':
                 case 'claude-3-sonnet':
-                    return await this.callClaude(prompt, systemPrompt, preferredModel);
+                    return await this.callClaude(prompt, enhancedSystemPrompt, preferredModel);
                 case 'local-llm':
-                    return await this.callLocalLLM(prompt, systemPrompt);
+                    return await this.callLocalLLM(prompt, enhancedSystemPrompt);
                 case 'custom':
-                    return await this.callCustomAPI(prompt, systemPrompt);
+                    return await this.callCustomAPI(prompt, enhancedSystemPrompt);
                 default:
-                    return await this.callDeepSeek(prompt, systemPrompt);
+                    return await this.callDeepSeek(prompt, enhancedSystemPrompt);
             }
         }
         catch (error) {
@@ -398,6 +403,57 @@ Use appropriate testing frameworks for ${language}.`;
     }
     dispose() {
         this.localLLM.dispose();
+    }
+    // 🧠 Memory Management Methods
+    buildSystemPromptWithMemory(originalPrompt, memoryContext) {
+        const basePrompt = originalPrompt || `You are Jordi, an AI development assistant specialized in Next.js and Web3 development for Sui and Solana blockchains. You are helpful, knowledgeable, and focused on providing practical solutions.`;
+        if (!memoryContext) {
+            return basePrompt;
+        }
+        return `${basePrompt}
+
+🧠 MEMORY CONTEXT (Check this before responding):
+${memoryContext}
+
+IMPORTANT: Before responding to any request:
+1. Check the memory context above for relevant information
+2. Consider user preferences and past configurations
+3. Remember any important project context
+4. Use this information to provide more personalized and contextual responses
+5. Update your memory with any new important information learned during this conversation
+
+Remember to be consistent with past preferences and build upon previous work.`;
+    }
+    // Memory access methods for external use
+    getMemoryManager() {
+        return this.memoryManager;
+    }
+    async rememberApiConfiguration(provider) {
+        this.memoryManager.rememberApiKey(provider);
+        this.memoryManager.updateUserPreference('preferredAI', provider);
+    }
+    async rememberTaskCompletion(taskType, details) {
+        this.memoryManager.rememberTask(taskType, details);
+    }
+    async rememberImportantNote(title, content, tags = []) {
+        this.memoryManager.rememberImportantNote(title, content, tags);
+    }
+    async getFormattedMemory() {
+        return this.memoryManager.getFormattedMemory();
+    }
+    async searchMemory(query) {
+        return this.memoryManager.searchMemory(query);
+    }
+    async updateProjectContext(framework, language, dependencies) {
+        if (framework) {
+            this.memoryManager.updateProjectContext('framework', framework);
+        }
+        if (language) {
+            this.memoryManager.updateProjectContext('language', language);
+        }
+        if (dependencies) {
+            this.memoryManager.updateProjectContext('dependencies', dependencies);
+        }
     }
 }
 exports.AIAgentProvider = AIAgentProvider;

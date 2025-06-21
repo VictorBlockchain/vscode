@@ -419,6 +419,56 @@ User: "use deepseek"
 
 ---
 
+## 🧠 Memory Management
+
+### **View Memory**
+```
+User: "show my memory"
+🤖: 🧠 **Jordi's Memory Notepad**
+
+📋 **Project Context**
+• Framework: Next.js 14
+• Language: TypeScript
+• Last updated: 2024-01-15
+
+⚙️ **Configuration**
+• Preferred AI: DeepSeek
+• API Keys: OpenAI, DeepSeek configured
+• Last updated: 2024-01-15
+```
+
+### **Search Memory**
+```
+User: "search memory for API keys"
+🤖: 🔍 **Found 2 memories for "API keys":**
+
+🟡 **API Configuration**
+*configuration • 1/15/2024*
+OpenAI and DeepSeek API keys configured successfully
+
+🔵 **User Preference**
+*user_preference • 1/15/2024*
+User prefers DeepSeek for cost efficiency
+```
+
+### **Add to Memory**
+```
+User: "remember that I prefer TypeScript over JavaScript"
+🤖: ✅ **Remembered:** I prefer TypeScript over JavaScript
+
+User: "note that this project uses Solana blockchain"
+🤖: ✅ **Remembered:** this project uses Solana blockchain
+```
+
+### **Memory Commands**
+- **View**: "show my memory", "what do you remember", "view my notes"
+- **Search**: "search memory for X", "find notes about Y"
+- **Add**: "remember that...", "note that...", "add to memory..."
+- **Clear**: "clear my memory", "reset memory"
+- **Help**: "memory help"
+
+---
+
 ## 🎉 Summary
 
 **Chat configuration makes the Web3 AI Agent incredibly user-friendly!**

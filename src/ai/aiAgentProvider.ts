@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
 import { LocalLLMProvider, LocalLLMResponse } from './localLLMProvider';
+import { MemoryManager } from '../memory/memoryManager';
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -27,11 +28,13 @@ export class AIAgentProvider {
     private openai?: OpenAI;
     private anthropic?: Anthropic;
     private localLLM: LocalLLMProvider;
+    private memoryManager: MemoryManager;
     private projectContext?: ProjectContext;
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
         this.localLLM = new LocalLLMProvider();
+        this.memoryManager = new MemoryManager(context);
         this.initializeClients();
     }
 
@@ -53,22 +56,26 @@ export class AIAgentProvider {
         const config = vscode.workspace.getConfiguration('web3-ai-agent');
         const preferredModel = config.get<string>('preferredModel', 'deepseek');
 
+        // 🧠 Check memory before generating response
+        const memoryContext = this.memoryManager.getMemoryContext();
+        const enhancedSystemPrompt = this.buildSystemPromptWithMemory(systemPrompt, memoryContext);
+
         try {
             switch (preferredModel) {
                 case 'deepseek':
-                    return await this.callDeepSeek(prompt, systemPrompt);
+                    return await this.callDeepSeek(prompt, enhancedSystemPrompt);
                 case 'gpt-4':
                 case 'gpt-3.5-turbo':
-                    return await this.callOpenAI(prompt, systemPrompt, preferredModel);
+                    return await this.callOpenAI(prompt, enhancedSystemPrompt, preferredModel);
                 case 'claude-3-opus':
                 case 'claude-3-sonnet':
-                    return await this.callClaude(prompt, systemPrompt, preferredModel);
+                    return await this.callClaude(prompt, enhancedSystemPrompt, preferredModel);
                 case 'local-llm':
-                    return await this.callLocalLLM(prompt, systemPrompt);
+                    return await this.callLocalLLM(prompt, enhancedSystemPrompt);
                 case 'custom':
-                    return await this.callCustomAPI(prompt, systemPrompt);
+                    return await this.callCustomAPI(prompt, enhancedSystemPrompt);
                 default:
-                    return await this.callDeepSeek(prompt, systemPrompt);
+                    return await this.callDeepSeek(prompt, enhancedSystemPrompt);
             }
         } catch (error) {
             throw new Error(`AI API call failed: ${error}`);
@@ -454,5 +461,66 @@ Use appropriate testing frameworks for ${language}.`;
 
     dispose(): void {
         this.localLLM.dispose();
+    }
+
+    // 🧠 Memory Management Methods
+    private buildSystemPromptWithMemory(originalPrompt?: string, memoryContext?: string): string {
+        const basePrompt = originalPrompt || `You are Jordi, an AI development assistant specialized in Next.js and Web3 development for Sui and Solana blockchains. You are helpful, knowledgeable, and focused on providing practical solutions.`;
+        
+        if (!memoryContext) {
+            return basePrompt;
+        }
+
+        return `${basePrompt}
+
+🧠 MEMORY CONTEXT (Check this before responding):
+${memoryContext}
+
+IMPORTANT: Before responding to any request:
+1. Check the memory context above for relevant information
+2. Consider user preferences and past configurations
+3. Remember any important project context
+4. Use this information to provide more personalized and contextual responses
+5. Update your memory with any new important information learned during this conversation
+
+Remember to be consistent with past preferences and build upon previous work.`;
+    }
+
+    // Memory access methods for external use
+    public getMemoryManager(): MemoryManager {
+        return this.memoryManager;
+    }
+
+    public async rememberApiConfiguration(provider: string): Promise<void> {
+        this.memoryManager.rememberApiKey(provider);
+        this.memoryManager.updateUserPreference('preferredAI', provider);
+    }
+
+    public async rememberTaskCompletion(taskType: string, details: string): Promise<void> {
+        this.memoryManager.rememberTask(taskType, details);
+    }
+
+    public async rememberImportantNote(title: string, content: string, tags: string[] = []): Promise<void> {
+        this.memoryManager.rememberImportantNote(title, content, tags);
+    }
+
+    public async getFormattedMemory(): Promise<string> {
+        return this.memoryManager.getFormattedMemory();
+    }
+
+    public async searchMemory(query: string): Promise<any[]> {
+        return this.memoryManager.searchMemory(query);
+    }
+
+    public async updateProjectContext(framework?: string, language?: string, dependencies?: string[]): Promise<void> {
+        if (framework) {
+            this.memoryManager.updateProjectContext('framework', framework);
+        }
+        if (language) {
+            this.memoryManager.updateProjectContext('language', language);
+        }
+        if (dependencies) {
+            this.memoryManager.updateProjectContext('dependencies', dependencies);
+        }
     }
 }

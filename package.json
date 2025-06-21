@@ -132,6 +132,21 @@
         "command": "jordi.configureLocalLLM",
         "title": "Configure Local LLM",
         "category": "Jordi"
+      },
+      {
+        "command": "jordi.showMemory",
+        "title": "Show Memory Notepad",
+        "category": "Jordi"
+      },
+      {
+        "command": "jordi.searchMemory",
+        "title": "Search Memory",
+        "category": "Jordi"
+      },
+      {
+        "command": "jordi.clearMemory",
+        "title": "Clear Memory",
+        "category": "Jordi"
       }
     ],
     "menus": {

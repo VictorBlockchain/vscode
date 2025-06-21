@@ -396,6 +396,161 @@ ${task.logs.slice(-5).map(log => `[${log.timestamp.toLocaleTimeString()}] ${log.
                     vscode.commands.executeCommand('jordi.testLocalLLM');
                 }
             });
+        }),
+        // Memory Management Commands
+        vscode.commands.registerCommand('jordi.showMemory', async () => {
+            try {
+                const formattedMemory = await aiAgent.getFormattedMemory();
+                const panel = vscode.window.createWebviewPanel('jordiMemory', 'Jordi\'s Memory Notepad', vscode.ViewColumn.One, {
+                    enableScripts: true,
+                    retainContextWhenHidden: true
+                });
+                panel.webview.html = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Jordi's Memory</title>
+                        <style>
+                            body { 
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                                padding: 20px;
+                                line-height: 1.6;
+                                color: var(--vscode-foreground);
+                                background: var(--vscode-editor-background);
+                            }
+                            .memory-section {
+                                margin-bottom: 20px;
+                                padding: 15px;
+                                border: 1px solid var(--vscode-panel-border);
+                                border-radius: 8px;
+                                background: var(--vscode-editor-background);
+                            }
+                            .memory-title {
+                                font-size: 18px;
+                                font-weight: bold;
+                                margin-bottom: 10px;
+                                color: var(--vscode-textLink-foreground);
+                            }
+                            .memory-item {
+                                margin-bottom: 10px;
+                                padding: 8px;
+                                background: var(--vscode-input-background);
+                                border-radius: 4px;
+                            }
+                            .priority-critical { border-left: 4px solid #ff4444; }
+                            .priority-high { border-left: 4px solid #ffaa00; }
+                            .priority-medium { border-left: 4px solid #0088ff; }
+                            .priority-low { border-left: 4px solid #888888; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>🧠 Jordi's Memory Notepad</h1>
+                        <div style="white-space: pre-wrap;">${formattedMemory}</div>
+                    </body>
+                    </html>
+                `;
+            }
+            catch (error) {
+                vscode.window.showErrorMessage(`Failed to show memory: ${error}`);
+            }
+        }),
+        vscode.commands.registerCommand('jordi.searchMemory', async () => {
+            try {
+                const query = await vscode.window.showInputBox({
+                    prompt: 'What would you like to search for in memory?',
+                    placeHolder: 'e.g., API keys, React components, user preferences...'
+                });
+                if (!query)
+                    return;
+                const results = await aiAgent.searchMemory(query);
+                if (results.length === 0) {
+                    vscode.window.showInformationMessage(`No memories found for "${query}"`);
+                    return;
+                }
+                const panel = vscode.window.createWebviewPanel('jordiMemorySearch', `Memory Search: ${query}`, vscode.ViewColumn.One, {
+                    enableScripts: true,
+                    retainContextWhenHidden: true
+                });
+                let html = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Memory Search Results</title>
+                        <style>
+                            body { 
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                                padding: 20px;
+                                line-height: 1.6;
+                                color: var(--vscode-foreground);
+                                background: var(--vscode-editor-background);
+                            }
+                            .result {
+                                margin-bottom: 15px;
+                                padding: 15px;
+                                border: 1px solid var(--vscode-panel-border);
+                                border-radius: 8px;
+                                background: var(--vscode-input-background);
+                            }
+                            .result-title {
+                                font-weight: bold;
+                                color: var(--vscode-textLink-foreground);
+                                margin-bottom: 5px;
+                            }
+                            .result-meta {
+                                font-size: 12px;
+                                color: var(--vscode-descriptionForeground);
+                                margin-bottom: 8px;
+                            }
+                            .priority-critical { border-left: 4px solid #ff4444; }
+                            .priority-high { border-left: 4px solid #ffaa00; }
+                            .priority-medium { border-left: 4px solid #0088ff; }
+                            .priority-low { border-left: 4px solid #888888; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>🔍 Search Results for "${query}"</h1>
+                        <p>Found ${results.length} memories:</p>
+                `;
+                results.forEach(memory => {
+                    const priorityIcon = {
+                        'critical': '🔴',
+                        'high': '🟡',
+                        'medium': '🔵',
+                        'low': '⚪'
+                    }[memory.priority];
+                    html += `
+                        <div class="result priority-${memory.priority}">
+                            <div class="result-title">${priorityIcon} ${memory.title}</div>
+                            <div class="result-meta">${memory.category} • ${memory.timestamp.toLocaleDateString()}</div>
+                            <div>${memory.content}</div>
+                        </div>
+                    `;
+                });
+                html += `
+                    </body>
+                    </html>
+                `;
+                panel.webview.html = html;
+            }
+            catch (error) {
+                vscode.window.showErrorMessage(`Failed to search memory: ${error}`);
+            }
+        }),
+        vscode.commands.registerCommand('jordi.clearMemory', async () => {
+            const confirmation = await vscode.window.showWarningMessage('Are you sure you want to clear all memories? This action cannot be undone.', { modal: true }, 'Clear Memory', 'Cancel');
+            if (confirmation === 'Clear Memory') {
+                try {
+                    aiAgent.getMemoryManager().clearMemory();
+                    vscode.window.showInformationMessage('🧠 Memory cleared! Starting fresh with a new notepad.');
+                }
+                catch (error) {
+                    vscode.window.showErrorMessage(`Failed to clear memory: ${error}`);
+                }
+            }
         })
     ];
     // Add all commands to subscriptions
